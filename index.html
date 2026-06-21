@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>◊ FallClinic · sovereign UK private healthcare clinic patient + episode management · CQC · DSPT · CD register</title>
+<meta name="description" content="Sovereign UK private healthcare clinic patient + episode management. CQC KLOE evidence, DSPT, controlled drug register, Caldicott, MCA 2005, safeguarding, prescription tracking. CQC-registered or exempt-with-notification. Informational tool, not a prescribing system or NHS Spine.">
+<meta name="prime" content="919">
+<meta name="version" content="1.0.0">
+<meta name="theme-color" content="#0b0a0f">
+<link rel="manifest" href='data:application/manifest+json,{"name":"FallClinic","short_name":"clinic","start_url":"./","display":"standalone","background_color":"%230b0a0f","theme_color":"%238b1a1a","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27><rect width=%27192%27 height=%27192%27 fill=%27%230b0a0f%27 rx=%2828%27/><text x=%2796%27 y=%27138%27 font-family=%27Georgia, serif%27 font-size=%27124%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27%238b1a1a%27>◊</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+<style>
+:root{
+  --void:#0b0a0f;--void-2:#13121a;--ink:#1a1922;--ink-2:#22212c;
+  --line:#2a2934;--line-soft:#1f1e28;
+  --cream:#e6e1d6;--cream-dim:#a8a395;--cream-muted:#6e6a5e;
+  --brass:#9a7a3a;--amber:#cc7a1f;--ox:#7a1818;--ox-2:#5a1212;
+  --green:#3a9a5a;--red:#c43838;--blue:#4a7aa8;--yellow:#c89a28;
+  --serif:Georgia,'Libre Baskerville',ui-serif,serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono','SF Mono',ui-monospace,Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--void);color:var(--cream);font:14px/1.55 var(--sans);min-height:100dvh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;background:transparent;border:none;color:inherit}
+input,textarea,select{font-family:inherit;background:var(--ink);border:1px solid var(--line);color:var(--cream);border-radius:3px;padding:7px 10px;outline:none;font-size:13px}
+input:focus,textarea:focus,select:focus{border-color:var(--brass)}
+input[type=number]{font-family:var(--mono)}
+a{color:var(--brass)}a:hover{color:var(--amber)}
+textarea{min-height:80px;resize:vertical;font-family:var(--mono);font-size:12px}
+
+.app{min-height:100dvh;display:grid;grid-template-rows:48px 1fr}
+header{display:flex;align-items:center;border-bottom:1px solid var(--line);background:var(--void-2);user-select:none}
+.brand{display:flex;align-items:center;gap:10px;padding:0 16px;height:100%;border-right:1px solid var(--line)}
+.brand .mark{width:28px;height:28px;background:linear-gradient(135deg,var(--ox),var(--ox-2));border-radius:5px;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:16px;color:var(--cream)}
+.brand .name{font-family:var(--serif);font-weight:600;font-size:14px;letter-spacing:0.02em}
+.brand .seal{font-family:var(--mono);font-size:9px;color:var(--cream-muted);letter-spacing:0.18em;text-transform:uppercase}
+
+.pt-pill{display:flex;align-items:center;gap:8px;padding:0 14px;height:100%;border-right:1px solid var(--line);cursor:pointer;font-size:12px;color:var(--cream-dim)}
+.pt-pill:hover{background:var(--ink);color:var(--cream)}
+.pt-pill .who{font-family:var(--serif);font-size:13px;color:var(--brass)}
+.pt-pill .meta{font-family:var(--mono);font-size:9px;color:var(--cream-muted);letter-spacing:0.1em;text-transform:uppercase}
+
+nav.tabs{display:flex;flex:1;overflow-x:auto;align-items:stretch}
+nav.tabs button{padding:0 14px;font-size:12px;color:var(--cream-dim);letter-spacing:0.04em;display:flex;align-items:center;gap:6px;border-right:1px solid var(--line-soft);height:100%;white-space:nowrap;border-top:2px solid transparent}
+nav.tabs button:hover{background:var(--ink);color:var(--cream)}
+nav.tabs button.active{background:var(--ink);color:var(--brass);border-top-color:var(--ox)}
+
+.tools-r{display:flex;align-items:center;gap:5px;padding:0 14px;height:100%;border-left:1px solid var(--line)}
+.tool-btn{padding:5px 11px;border-radius:3px;font-size:11px;color:var(--cream-dim);letter-spacing:0.06em;text-transform:uppercase;font-family:var(--mono);border:1px solid var(--line)}
+.tool-btn:hover{background:var(--ink);color:var(--cream);border-color:var(--brass)}
+.tool-btn.primary{background:var(--ox);color:var(--cream);border-color:var(--ox);font-weight:600}
+.tool-btn.primary:hover{background:var(--ox-2);border-color:var(--ox-2)}
+
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100dvh - 48px)}
+aside.sidebar{background:var(--void-2);border-right:1px solid var(--line);overflow-y:auto;padding:14px 12px 60px;display:flex;flex-direction:column;gap:10px}
+.sidebar h4{font-family:var(--mono);font-size:10px;color:var(--brass);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;padding:0 4px}
+.sidebar-search{display:flex;flex-direction:column;gap:6px}
+.sidebar-search input,.sidebar-search select{font-size:12px;padding:6px 8px}
+.pt-list{display:flex;flex-direction:column;gap:3px}
+.pt-card{padding:9px 11px;border-radius:3px;cursor:pointer;border:1px solid transparent;border-left:3px solid var(--line);background:var(--ink);transition:all 0.1s}
+.pt-card:hover{background:var(--ink-2);border-left-color:var(--ox)}
+.pt-card.active{background:var(--ink-2);border-left-color:var(--ox);border-color:var(--line)}
+.pt-card .nm{font-family:var(--serif);font-size:13px;color:var(--cream);font-weight:600}
+.pt-card .sub{font-family:var(--mono);font-size:10px;color:var(--cream-muted);letter-spacing:0.06em;margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.pt-card .sub .tag{padding:1px 5px;border-radius:2px;background:var(--void);color:var(--cream-dim);font-size:9px}
+.pt-card .sub .tag.due{background:var(--ox);color:var(--cream)}
+.pt-card .sub .tag.vul{background:var(--yellow);color:var(--void)}
+.pt-card .sub .tag.ep{color:var(--green);border:1px solid var(--green)}
+.empty-state{padding:18px;text-align:center;color:var(--cream-muted);font-size:12px;font-style:italic}
+
+main{padding:18px 22px 60px;overflow-y:auto;max-width:1240px;margin:0 auto;width:100%}
+
+.disclaimer{background:rgba(122,24,24,0.20);border:1px solid var(--ox);border-left:3px solid var(--ox);border-radius:3px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--cream)}
+.disclaimer strong{color:var(--brass)}
+
+.section-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:14px;flex-wrap:wrap}
+.section-h h2{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:0.01em}
+.section-h .sub{font-family:var(--mono);font-size:11px;color:var(--cream-muted);letter-spacing:0.08em;text-transform:uppercase}
+.section-h .actions{display:flex;gap:6px;flex-wrap:wrap}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.card{background:var(--void-2);border:1px solid var(--line);border-radius:4px;padding:16px 18px}
+.card h3{font-family:var(--serif);font-size:14px;font-weight:600;margin-bottom:10px;color:var(--cream);letter-spacing:0.01em}
+.card h3 .meta{font-family:var(--mono);font-size:10px;color:var(--brass);letter-spacing:0.1em;margin-left:8px}
+
+.kpi{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line-soft);font-size:13px}
+.kpi:last-child{border-bottom:none}
+.kpi .l{color:var(--cream-dim)}
+.kpi .v{font-family:var(--mono);color:var(--cream);font-weight:500}
+.kpi .v.green{color:var(--green)}.kpi .v.red{color:var(--red)}.kpi .v.amber{color:var(--amber)}.kpi .v.brass{color:var(--brass)}.kpi .v.blue{color:var(--blue)}
+
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.row.r3{grid-template-columns:1fr 1fr 1fr}
+.row.r4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field label{display:block;font-family:var(--mono);font-size:10px;color:var(--cream-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px}
+.field input,.field select,.field textarea{width:100%}
+.field .hint{font-size:10px;color:var(--cream-muted);margin-top:3px;font-family:var(--mono)}
+
+.btn{padding:7px 14px;border:1px solid var(--brass);border-radius:3px;font-size:12px;color:var(--cream);background:transparent;letter-spacing:0.04em;cursor:pointer}
+.btn:hover{border-color:var(--amber);color:var(--amber)}
+.btn.primary{background:var(--ox);color:var(--cream);border-color:var(--ox);font-weight:600}
+.btn.primary:hover{background:var(--ox-2);border-color:var(--ox-2);color:var(--cream)}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover{background:rgba(196,56,56,0.10)}
+.btn.sm{padding:4px 9px;font-size:11px}
+.btn.ghost{border-color:var(--line);color:var(--cream-dim)}
+.btn.ghost:hover{border-color:var(--brass);color:var(--brass)}
+
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line-soft);text-align:left;vertical-align:top}
+th{color:var(--brass);font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600}
+td.r{text-align:right;font-family:var(--mono)}
+tr.total td{font-weight:600;border-top:1px solid var(--brass);border-bottom:none;padding-top:10px}
+tr.clickable{cursor:pointer}
+tr.clickable:hover{background:var(--ink)}
+
+.tag{display:inline-block;padding:2px 7px;border-radius:11px;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--brass);color:var(--brass);margin-right:4px}
+.tag.amber{border-color:var(--amber);color:var(--amber)}
+.tag.green{border-color:var(--green);color:var(--green)}
+.tag.red{border-color:var(--red);color:var(--red)}
+.tag.blue{border-color:var(--blue);color:var(--blue)}
+.tag.dim{border-color:var(--line);color:var(--cream-muted)}
+
+.chat{display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;padding:6px}
+.msg{padding:10px 14px;border-radius:6px;max-width:88%;font-size:13px;line-height:1.55;white-space:pre-wrap}
+.msg.user{background:var(--ink);align-self:flex-end;border-bottom-right-radius:2px}
+.msg.bot{background:var(--void-2);border:1px solid var(--line);border-left:2px solid var(--ox);align-self:flex-start;border-bottom-left-radius:2px}
+.msg.bot .src{font-family:var(--mono);font-size:10px;color:var(--cream-muted);letter-spacing:0.08em;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.chat-input{display:flex;gap:8px;margin-top:10px}
+.chat-input input{flex:1;padding:11px 14px}
+
+.subtabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:14px;overflow-x:auto}
+.subtabs button{padding:8px 14px;font-size:12px;color:var(--cream-dim);letter-spacing:0.04em;white-space:nowrap;border-bottom:2px solid transparent}
+.subtabs button:hover{color:var(--cream)}
+.subtabs button.active{color:var(--brass);border-bottom-color:var(--ox)}
+
+.note-entry{background:var(--ink);border-left:3px solid var(--ox);border-radius:3px;padding:10px 12px;margin-bottom:8px}
+.note-entry .hd{font-family:var(--mono);font-size:10px;color:var(--cream-muted);letter-spacing:0.06em;display:flex;justify-content:space-between;margin-bottom:6px}
+.note-entry .hd .by{color:var(--brass)}
+.note-entry .bd{font-size:13px;white-space:pre-wrap;font-family:var(--serif)}
+.note-entry .hash{font-family:var(--mono);font-size:9px;color:var(--cream-muted);margin-top:6px;letter-spacing:0.04em;word-break:break-all}
+.note-entry.correction{border-left-color:var(--amber)}
+
+.cd-ledger{font-family:var(--mono);font-size:11px}
+.cd-ledger .row-hd{display:grid;grid-template-columns:90px 80px 1fr 80px 80px 80px;gap:6px;padding:6px 0;border-bottom:1px solid var(--brass);color:var(--brass);font-size:10px;letter-spacing:0.06em;text-transform:uppercase}
+.cd-ledger .row-it{display:grid;grid-template-columns:90px 80px 1fr 80px 80px 80px;gap:6px;padding:6px 0;border-bottom:1px dashed var(--line-soft);font-size:11px}
+.cd-ledger .row-it .tx-received{color:var(--green)}
+.cd-ledger .row-it .tx-dispensed{color:var(--amber)}
+.cd-ledger .row-it .tx-destroyed{color:var(--red)}
+
+.kloe-card{background:var(--void-2);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:10px}
+.kloe-card h4{font-family:var(--serif);font-size:14px;color:var(--brass);margin-bottom:6px}
+.kloe-card .rating{display:inline-block;padding:2px 8px;border-radius:3px;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;margin-left:8px}
+.rating.outstanding{background:var(--green);color:var(--void)}
+.rating.good{background:var(--blue);color:var(--cream)}
+.rating.requires-improvement{background:var(--amber);color:var(--void)}
+.rating.inadequate{background:var(--red);color:var(--cream)}
+.rating.not-rated{background:var(--ink);color:var(--cream-muted);border:1px solid var(--line)}
+
+.timeline{position:relative;padding-left:20px;border-left:2px solid var(--line)}
+.timeline .ev{position:relative;padding:8px 0 8px 14px;font-size:12px}
+.timeline .ev::before{content:'';position:absolute;left:-22px;top:14px;width:8px;height:8px;border-radius:50%;background:var(--brass);border:2px solid var(--void)}
+.timeline .ev .ts{font-family:var(--mono);font-size:10px;color:var(--cream-muted);letter-spacing:0.06em}
+.timeline .ev .act{color:var(--cream);font-weight:600}
+.timeline .ev .rzn{color:var(--cream-dim);font-size:11px;margin-top:2px;font-style:italic}
+
+.alert-flag{background:rgba(196,56,56,0.15);border:1px solid var(--red);border-left:3px solid var(--red);padding:8px 12px;border-radius:3px;margin-bottom:8px;font-size:12px;color:var(--cream)}
+.alert-flag.amber{background:rgba(204,122,31,0.12);border-color:var(--amber);border-left-color:var(--amber)}
+
+.palette-bg,.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:flex-start;justify-content:center;padding-top:14vh;z-index:900;backdrop-filter:blur(4px)}
+.palette-bg.open,.modal-bg.open{display:flex}
+.modal-bg{align-items:center;padding:18px}
+.palette{background:var(--void-2);border:1px solid var(--ox);border-radius:5px;width:min(640px,90%);box-shadow:0 18px 50px rgba(0,0,0,0.7);overflow:hidden}
+.palette-hd{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.palette-hd .glyph{font-family:var(--serif);font-size:18px;color:var(--brass)}
+.palette-hd input{flex:1;border:none;background:transparent;font-size:15px;padding:4px}
+.palette-bd{max-height:50vh;overflow:auto;padding:8px}
+.palette-row{padding:9px 12px;border-radius:3px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px}
+.palette-row:hover{background:var(--ink)}
+.modal{background:var(--void-2);border:1px solid var(--ox);border-radius:4px;padding:22px;max-width:680px;width:100%;max-height:90vh;overflow:auto}
+.modal h2{font-family:var(--serif);font-size:17px;margin-bottom:14px}
+.modal .actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ox);color:var(--cream);padding:9px 18px;border-radius:3px;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;opacity:0;transition:all 0.22s;z-index:1100;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.onboard{max-width:580px;margin:5vh auto;padding:36px 32px;background:var(--void-2);border:1px solid var(--ox);border-radius:6px}
+.onboard h1{font-family:var(--serif);font-size:28px;color:var(--brass);margin-bottom:6px}
+.onboard .lead{color:var(--cream-dim);margin-bottom:20px;font-size:13px}
+.onboard .step{font-family:var(--mono);font-size:10px;color:var(--brass);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px}
+
+.drawer-toggle{display:none;padding:0 12px;height:100%;align-items:center;border-right:1px solid var(--line);cursor:pointer;color:var(--brass);font-size:18px}
+
+@media (max-width:880px){
+  .drawer-toggle{display:flex}
+  .layout{grid-template-columns:1fr}
+  aside.sidebar{position:fixed;top:48px;left:-320px;bottom:0;width:300px;z-index:50;transition:left 0.2s;box-shadow:0 0 30px rgba(0,0,0,0.6)}
+  aside.sidebar.open{left:0}
+  nav.tabs button{padding:0 10px;font-size:11px}
+  main{padding:14px 14px 50px}
+  .row,.row.r3,.row.r4{grid-template-columns:1fr}
+  .brand .seal{display:none}
+  .cd-ledger .row-hd,.cd-ledger .row-it{grid-template-columns:1fr 1fr;font-size:10px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="palette-bg" id="palette"><div class="palette"><div class="palette-hd"><div class="glyph">◊</div><input id="pInput" placeholder="ask a clinical / compliance question · GMC · CQC · DSPT · MCA · controlled drugs · ⌘K"></div><div class="palette-bd" id="pBody"></div></div></div>
+<div class="modal-bg" id="modal"><div class="modal"><h2 id="modalTitle">Settings</h2><div id="modalBody"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// FallClinic v1.0.0 · sovereign UK private healthcare
+// prime 919 · CQC · DSPT · Controlled Drugs · Caldicott
+// SOVEREIGN · INFORMATIONAL · NOT A PRESCRIBING SYSTEM
+// ════════════════════════════════════════════════════════════════
+const TOOLNAME='fallclinic';const VERSION='1.0.0';const PRIME=919;const STORE='fallclinic-v1';const CONFIG_V='fallclinic@'+VERSION;
+
+const KLOES=[
+  {id:'safe',name:'Safe',desc:'People are protected from abuse and avoidable harm.'},
+  {id:'effective',name:'Effective',desc:'Care, treatment and support achieves good outcomes, helps people maintain quality of life.'},
+  {id:'caring',name:'Caring',desc:'Staff involve and treat people with compassion, kindness, dignity and respect.'},
+  {id:'responsive',name:'Responsive',desc:'Services are organised so that they meet people’s needs.'},
+  {id:'well-led',name:'Well-led',desc:'Leadership, management and governance assures high-quality, person-centred care.'}
+];
+
+const PROF_BODIES=['GMC','GDC','NMC','HCPC','GPhC','GOC','GOsC','GCC','other'];
+
+// CD register · Misuse of Drugs Regulations 2001 · Schedule 2 & 3
+const CD_SCHEDULES={
+  '2':'Schedule 2 (e.g. morphine, diamorphine, methadone, oxycodone, fentanyl, pethidine, cocaine)',
+  '3':'Schedule 3 (e.g. midazolam, temazepam, buprenorphine, tramadol, gabapentin, pregabalin)'
+};
+
+// Embedded BNF-shaped interaction list (~50 common pairs · NOT exhaustive)
+const INTERACTIONS=[
+  ['warfarin','aspirin','SEVERE','Increased bleeding risk · INR'],
+  ['warfarin','ibuprofen','SEVERE','GI bleeding risk · avoid'],
+  ['warfarin','amiodarone','SEVERE','Potentiates warfarin · halve dose'],
+  ['warfarin','clarithromycin','SEVERE','Raises INR significantly'],
+  ['warfarin','metronidazole','SEVERE','Raises INR'],
+  ['warfarin','fluconazole','MODERATE','Raises INR'],
+  ['warfarin','paracetamol','MODERATE','Prolonged use may raise INR'],
+  ['simvastatin','clarithromycin','SEVERE','Rhabdomyolysis risk · stop statin'],
+  ['simvastatin','erythromycin','SEVERE','Rhabdomyolysis risk'],
+  ['simvastatin','amiodarone','MODERATE','Max 20mg simva'],
+  ['simvastatin','amlodipine','MODERATE','Max 20mg simva'],
+  ['amiodarone','digoxin','SEVERE','Reduce digoxin 50%'],
+  ['digoxin','furosemide','MODERATE','Hypokalaemia ↑ digoxin toxicity'],
+  ['lithium','ibuprofen','SEVERE','NSAIDs raise lithium · toxicity'],
+  ['lithium','diuretics','SEVERE','Raises lithium · toxicity'],
+  ['lithium','ACE-inhibitor','SEVERE','Raises lithium'],
+  ['methotrexate','trimethoprim','SEVERE','Pancytopenia risk · avoid'],
+  ['methotrexate','NSAID','MODERATE','Reduces clearance'],
+  ['SSRI','tramadol','SEVERE','Serotonin syndrome'],
+  ['SSRI','triptan','MODERATE','Serotonin syndrome'],
+  ['SSRI','MAOI','SEVERE','Serotonin syndrome · 14-day washout'],
+  ['SSRI','NSAID','MODERATE','GI bleeding risk'],
+  ['SSRI','warfarin','MODERATE','Bleeding risk'],
+  ['MAOI','tyramine-foods','SEVERE','Hypertensive crisis'],
+  ['MAOI','pethidine','SEVERE','Serotonin syndrome'],
+  ['clopidogrel','omeprazole','MODERATE','Reduces clopidogrel · prefer pantoprazole'],
+  ['clopidogrel','aspirin','MODERATE','Bleeding · per cardiology'],
+  ['ACE-inhibitor','spironolactone','SEVERE','Hyperkalaemia'],
+  ['ACE-inhibitor','NSAID','MODERATE','Renal failure · esp elderly'],
+  ['ACE-inhibitor','lithium','SEVERE','Lithium toxicity'],
+  ['beta-blocker','verapamil','SEVERE','Bradycardia · AV block'],
+  ['beta-blocker','diltiazem','SEVERE','Bradycardia · AV block'],
+  ['theophylline','ciprofloxacin','SEVERE','Theophylline toxicity'],
+  ['theophylline','erythromycin','SEVERE','Theophylline toxicity'],
+  ['phenytoin','fluconazole','MODERATE','Phenytoin toxicity'],
+  ['phenytoin','warfarin','MODERATE','Initial INR rise then fall'],
+  ['carbamazepine','warfarin','MODERATE','Reduces warfarin effect'],
+  ['carbamazepine','clarithromycin','SEVERE','Carbamazepine toxicity'],
+  ['oral-contraceptive','rifampicin','SEVERE','Contraceptive failure'],
+  ['oral-contraceptive','antiepileptic','MODERATE','Reduced contraceptive effect'],
+  ['oral-contraceptive','antibiotic','LOW','Most antibiotics no longer thought to interact'],
+  ['metformin','contrast-iodinated','SEVERE','Stop 48h pre/post · lactic acidosis'],
+  ['ciclosporin','grapefruit','SEVERE','Raises ciclosporin'],
+  ['ciclosporin','statin','MODERATE','Myopathy risk'],
+  ['allopurinol','azathioprine','SEVERE','Pancytopenia · reduce azathioprine 75%'],
+  ['allopurinol','warfarin','MODERATE','Raises INR'],
+  ['NSAID','ACE-inhibitor','MODERATE','Renal impairment'],
+  ['NSAID','diuretic','MODERATE','Reduces diuretic effect'],
+  ['opioid','benzodiazepine','SEVERE','Respiratory depression'],
+  ['opioid','alcohol','SEVERE','Respiratory depression']
+];
+
+const TABS=[
+  {id:'dashboard',name:'Dashboard',ico:'◐'},
+  {id:'patients',name:'Patients',ico:'◊'},
+  {id:'patient',name:'Patient',ico:'§'},
+  {id:'episodes',name:'Episodes',ico:'≡'},
+  {id:'prescriptions',name:'Rx',ico:'℞'},
+  {id:'cd-register',name:'CD Register',ico:'⚕'},
+  {id:'safeguarding',name:'Safeguarding',ico:'△'},
+  {id:'cqc',name:'CQC',ico:'⊞'},
+  {id:'dspt',name:'DSPT',ico:'⊡'},
+  {id:'qa',name:'Q & A',ico:'?'},
+  {id:'audit',name:'Audit',ico:'∴'},
+  {id:'clinic',name:'Clinic',ico:'⌂'}
+];
+
+let state={
+  active:'dashboard',
+  activePatientId:null,
+  activeEpisodeId:null,
+  patientTab:'overview',
+  firm:null,
+  clinicians:[],
+  patients:[],
+  episodes:[],
+  prescriptions:[],
+  cdRegister:[],
+  safeguardingLog:[],
+  audit:[],
+  settings:{anthropicKey:'',geminiKey:'',openaiKey:'',openrouterKey:'',auditChain:true,currentClinicianId:null},
+  chat:[],
+  drawerOpen:false,
+  filters:{q:'',active:false,vulnerable:false,dueSoon:false}
+};
+
+const $=(s,p)=>{p=p||document;return p.querySelector(s)};
+const $$=(s,p)=>{p=p||document;return Array.from(p.querySelectorAll(s))};
+const uid=(pfx)=>(pfx||'')+(crypto.randomUUID?crypto.randomUUID().replace(/-/g,'').slice(0,12):Math.random().toString(36).slice(2,14));
+const now=()=>Date.now();
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dateStr=ts=>ts?new Date(ts).toISOString().slice(0,10):'—';
+const dateTimeStr=ts=>ts?new Date(ts).toISOString().replace('T',' ').slice(0,16):'—';
+const ageFromDob=dob=>{if(!dob)return null;const d=new Date(dob);const a=new Date();let age=a.getFullYear()-d.getFullYear();const m=a.getMonth()-d.getMonth();if(m<0||(m===0&&a.getDate()<d.getDate()))age--;return age};
+function toast(m){const t=$('#toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),1900)}
+async function sha256(s){const buf=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+function downloadFile(name,content,type){const blob=new Blob([content],{type:type||'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+function daysFromNow(ts){if(!ts)return null;return Math.floor((ts-Date.now())/(24*3600*1000))}
+
+// ════════════════════════════════════════════════════════════════
+// IDB
+// ════════════════════════════════════════════════════════════════
+let db;const DB_VERSION=1;const STORES=['firms','clinicians','patients','episodes','prescriptions','controlledDrugRegister','safeguardingLog','audit','settings'];
+function openDB(){return new Promise((res)=>{
+  try{
+    const r=indexedDB.open(STORE,DB_VERSION);
+    r.onupgradeneeded=e=>{const d=e.target.result;for(const s of STORES){if(!d.objectStoreNames.contains(s))d.createObjectStore(s,{keyPath:s==='settings'?undefined:'id'})}};
+    r.onsuccess=e=>{db=e.target.result;res(db)};
+    r.onerror=()=>{db=null;res(null)};
+  }catch(e){db=null;res(null)}
+})}
+function idbPut(store,rec,key){return new Promise((res)=>{
+  if(!db){lsPut(store,rec,key);return res()}
+  try{const tx=db.transaction(store,'readwrite');const s=tx.objectStore(store);const req=key?s.put(rec,key):s.put(rec);tx.oncomplete=()=>res();tx.onerror=()=>{lsPut(store,rec,key);res()};
+  }catch(e){lsPut(store,rec,key);res()}
+})}
+function idbGet(store,key){return new Promise((res)=>{
+  if(!db){return res(lsGet(store,key))}
+  try{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).get(key);req.onsuccess=()=>res(req.result);req.onerror=()=>res(lsGet(store,key));
+  }catch(e){res(lsGet(store,key))}
+})}
+function idbAll(store){return new Promise((res)=>{
+  if(!db){return res(lsAll(store))}
+  try{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=()=>res(req.result||[]);req.onerror=()=>res(lsAll(store));
+  }catch(e){res(lsAll(store))}
+})}
+function idbDel(store,key){return new Promise((res)=>{
+  if(!db){lsDel(store,key);return res()}
+  try{const tx=db.transaction(store,'readwrite');const req=tx.objectStore(store).delete(key);tx.oncomplete=()=>res();tx.onerror=()=>{lsDel(store,key);res()};
+  }catch(e){lsDel(store,key);res()}
+})}
+const LSKEY=k=>STORE+'::'+k;
+function lsPut(s,r,k){try{const all=JSON.parse(localStorage.getItem(LSKEY(s))||'{}');all[k||r.id]=r;localStorage.setItem(LSKEY(s),JSON.stringify(all))}catch(e){}}
+function lsGet(s,k){try{const all=JSON.parse(localStorage.getItem(LSKEY(s))||'{}');return all[k]}catch(e){return null}}
+function lsAll(s){try{return Object.values(JSON.parse(localStorage.getItem(LSKEY(s))||'{}'))}catch(e){return[]}}
+function lsDel(s,k){try{const all=JSON.parse(localStorage.getItem(LSKEY(s))||'{}');delete all[k];localStorage.setItem(LSKEY(s),JSON.stringify(all))}catch(e){}}
+
+async function loadAllStores(){
+  state.firm=(await idbAll('firms'))[0]||null;
+  state.clinicians=(await idbAll('clinicians'))||[];
+  state.patients=(await idbAll('patients'))||[];
+  state.episodes=(await idbAll('episodes'))||[];
+  state.prescriptions=(await idbAll('prescriptions'))||[];
+  state.cdRegister=(await idbAll('controlledDrugRegister'))||[];
+  state.safeguardingLog=(await idbAll('safeguardingLog'))||[];
+  state.audit=(await idbAll('audit'))||[];
+  state.audit.sort((a,b)=>(a.i||0)-(b.i||0));
+  const s=await idbGet('settings','app');if(s)state.settings=Object.assign({},state.settings,s);
+  const meta=await idbGet('settings','meta');
+  if(meta){state.activePatientId=meta.activePatientId||null;state.activeEpisodeId=meta.activeEpisodeId||null;state.active=meta.active||'dashboard';state.patientTab=meta.patientTab||'overview';state.chat=meta.chat||[];state.filters=meta.filters||state.filters}
+}
+async function saveMeta(){await idbPut('settings',{activePatientId:state.activePatientId,activeEpisodeId:state.activeEpisodeId,active:state.active,patientTab:state.patientTab,chat:state.chat.slice(-100),filters:state.filters},'meta')}
+async function saveSettingsRec(){await idbPut('settings',state.settings,'app');await saveMeta()}
+
+async function saveFirm(noBroadcast){if(!state.firm)return;state.firm.updatedAt=Date.now();await idbPut('firms',state.firm);await audit('firm.updated','Clinic record updated · Caldicott P1 (justify purpose)',{id:state.firm.id,name:state.firm.name});if(!noBroadcast)broadcast('firm.updated',state.firm)}
+async function saveClinician(c,reason,noBroadcast){c.updatedAt=Date.now();await idbPut('clinicians',c);const ix=state.clinicians.findIndex(x=>x.id===c.id);if(ix<0)state.clinicians.push(c);else state.clinicians[ix]=c;await audit('clinician.updated',reason||'Clinician record updated',{id:c.id,name:c.name});if(!noBroadcast)broadcastDebounced('clinician.updated',c)}
+async function savePatient(p,reason,noBroadcast){p.updatedAt=Date.now();await idbPut('patients',p);const ix=state.patients.findIndex(x=>x.id===p.id);if(ix<0)state.patients.push(p);else state.patients[ix]=p;await audit('patient.updated',reason||'Patient record updated · Caldicott P3 (minimum PCD)',{id:p.id,name:patientName(p)});if(!noBroadcast)broadcastDebounced('patient.updated',p)}
+async function saveEpisode(ep,reason,noBroadcast){ep.updatedAt=Date.now();await idbPut('episodes',ep);const ix=state.episodes.findIndex(x=>x.id===ep.id);if(ix<0)state.episodes.push(ep);else state.episodes[ix]=ep;await audit('episode.updated',reason||'Episode updated',{id:ep.id,patientId:ep.patientId});if(!noBroadcast)broadcastDebounced('episode.updated',ep)}
+async function savePrescription(rx,reason,noBroadcast){rx.updatedAt=Date.now();await idbPut('prescriptions',rx);const ix=state.prescriptions.findIndex(x=>x.id===rx.id);if(ix<0)state.prescriptions.push(rx);else state.prescriptions[ix]=rx;await audit('prescription.issued',reason||'Prescription issued',{id:rx.id,drug:rx.drug,patientId:rx.patientId});if(!noBroadcast)broadcast('prescription.issued',rx)}
+async function saveCDEntry(e,reason,noBroadcast){e.updatedAt=Date.now();await idbPut('controlledDrugRegister',e);const ix=state.cdRegister.findIndex(x=>x.id===e.id);if(ix<0)state.cdRegister.push(e);else state.cdRegister[ix]=e;await audit('controlled-drug.entry',reason||('CD '+e.tx+' · '+e.drug),{id:e.id,drug:e.drug,tx:e.tx});if(!noBroadcast)broadcast('controlled-drug.entry',e)}
+async function saveSafeguarding(s,reason,noBroadcast){s.updatedAt=Date.now();await idbPut('safeguardingLog',s);const ix=state.safeguardingLog.findIndex(x=>x.id===s.id);if(ix<0)state.safeguardingLog.push(s);else state.safeguardingLog[ix]=s;await audit('safeguarding.raised',reason||'Safeguarding concern logged',{id:s.id,type:s.type});if(!noBroadcast)broadcast('safeguarding.raised',s)}
+
+async function audit(action,reasoning,payload){
+  if(!state.settings.auditChain)return;
+  const prevHash=state.audit.length?state.audit[state.audit.length-1].docHash:'';
+  const i=state.audit.length;const ts=Date.now();
+  const clinicianId=state.settings.currentClinicianId||'';
+  const patientId=(payload&&payload.patientId)||(state.activePatientId||'');
+  const payloadStr=JSON.stringify(payload||{});
+  const docHash=await sha256(prevHash+ts+action+clinicianId+patientId+payloadStr);
+  const entry={id:'au_'+i+'_'+ts,i,ts,tool:TOOLNAME,clinicianId,patientId,action,reasoning:reasoning||'',configVersion:CONFIG_V,prevHash,docHash,payload:payload||{}};
+  state.audit.push(entry);
+  if(state.audit.length>200000)state.audit=state.audit.slice(-200000);
+  await idbPut('audit',entry);
+}
+
+// ════════════════════════════════════════════════════════════════
+// BROADCAST · fall-clinic + fall-signal
+// ════════════════════════════════════════════════════════════════
+let chClinic,chSignal;const broadcastTimers={};
+function broadcast(type,payload){try{chClinic&&chClinic.postMessage({v:1,type,ts:Date.now(),source:TOOLNAME,payload})}catch(e){}}
+function broadcastDebounced(type,payload){const k=type+':'+((payload&&payload.id)||'');clearTimeout(broadcastTimers[k]);broadcastTimers[k]=setTimeout(()=>broadcast(type,payload),300)}
+async function handleMeshMessage(m){
+  if(!m||m.source===TOOLNAME)return;
+  try{
+    if(m.type==='sync.request'){broadcast('sync.snapshot',{patients:state.patients,clinicians:state.clinicians,episodes:state.episodes,firm:state.firm});return}
+    if(m.type==='sync.snapshot'){
+      const p=m.payload||{};
+      if(p.firm&&(!state.firm||(p.firm.updatedAt||0)>(state.firm.updatedAt||0))){state.firm=p.firm;await idbPut('firms',p.firm)}
+      for(const c of(p.clinicians||[])){const local=state.clinicians.find(x=>x.id===c.id);if(!local||(c.updatedAt||0)>(local.updatedAt||0))await saveClinician(c,'sync from '+m.source,true)}
+      for(const pt of(p.patients||[])){const local=state.patients.find(x=>x.id===pt.id);if(!local||(pt.updatedAt||0)>(local.updatedAt||0))await savePatient(pt,'sync from '+m.source,true)}
+      for(const ep of(p.episodes||[])){const local=state.episodes.find(x=>x.id===ep.id);if(!local||(ep.updatedAt||0)>(local.updatedAt||0))await saveEpisode(ep,'sync from '+m.source,true)}
+      render();return;
+    }
+    if(m.type==='patient.created'||m.type==='patient.updated'){const pt=m.payload;if(!pt||!pt.id)return;const local=state.patients.find(x=>x.id===pt.id);if(!local||(pt.updatedAt||0)>(local.updatedAt||0)){await savePatient(pt,'mesh '+m.type+' from '+m.source,true);render()}}
+    else if(m.type==='clinician.updated'){const c=m.payload;if(!c||!c.id)return;const local=state.clinicians.find(x=>x.id===c.id);if(!local||(c.updatedAt||0)>(local.updatedAt||0)){await saveClinician(c,'mesh '+m.type+' from '+m.source,true);render()}}
+    else if(m.type==='firm.updated'){const f=m.payload;if(!f)return;if(!state.firm||(f.updatedAt||0)>(state.firm.updatedAt||0)){state.firm=f;await idbPut('firms',f);render()}}
+  }catch(e){console.warn('mesh err',e)}
+}
+function initMesh(){
+  try{chClinic=new BroadcastChannel('fall-clinic');chClinic.addEventListener('message',e=>handleMeshMessage(e.data));setTimeout(()=>broadcast('sync.request',{}),350)}catch(e){}
+  try{chSignal=new BroadcastChannel('fall-signal');chSignal.postMessage({source:TOOLNAME,type:'hello',prime:PRIME,version:VERSION,ts:Date.now()});chSignal.addEventListener('message',async e=>{const m=e.data;if(!m)return;if(m.type==='ping')chSignal.postMessage({source:TOOLNAME,type:'pong',prime:PRIME});if(m.source==='si-didy'&&m.type==='query'&&m.intent){const ans=await answerQuestion(m.intent);chSignal.postMessage({source:TOOLNAME,type:'answer',replyTo:m.id,text:ans.text})}})}catch(e){}
+}
+
+// ════════════════════════════════════════════════════════════════
+// HELPERS · active records, blanks
+// ════════════════════════════════════════════════════════════════
+function activePatient(){return state.patients.find(p=>p.id===state.activePatientId)}
+function activeClinician(){return state.clinicians.find(c=>c.id===state.settings.currentClinicianId)||state.clinicians[0]}
+function activeEpisode(){return state.episodes.find(e=>e.id===state.activeEpisodeId)}
+function patientName(p){if(!p)return '—';return [p.title,p.firstName,p.lastName].filter(Boolean).join(' ')||'unnamed'}
+function patientEpisodes(p){if(!p)return [];return state.episodes.filter(e=>e.patientId===p.id)}
+function activePatientEpisodes(p){return patientEpisodes(p).filter(e=>!e.closedAt)}
+function patientPrescriptions(p){if(!p)return [];return state.prescriptions.filter(r=>r.patientId===p.id)}
+
+function newBlankFirm(){return{id:'fm_'+uid(),createdAt:Date.now(),updatedAt:Date.now(),name:'',tradingName:'',cqcRegistered:true,cqcRegNo:'',cqcRegisteredManager:'',odsCode:'',companiesHouseNo:'',vatNumber:'',registeredAddress:{line1:'',line2:'',city:'',postcode:'',country:'GB'},piInsurer:'',piPolicyNo:'',piCover:0,piExpiresAt:null,dsptStatus:'not-applicable',dsptLastSubmittedAt:null,caldicottGuardian:'',informationGovernanceLead:'',brandColor:'#7a1818',setupCompletedAt:null}}
+function newBlankClinician(){return{id:'cn_'+uid(),firmId:(state.firm&&state.firm.id)||'',createdAt:Date.now(),updatedAt:Date.now(),archivedAt:null,name:'',role:'GP',email:'',phone:'',professionalBody:'GMC',registrationNo:'',revalidationDue:null,appraisalLastAt:null,dbsCheckedAt:null,indemnityProvider:'',indemnityCover:0,indemnityExpiry:null,status:'active',startedAt:Date.now(),leftAt:null}}
+function newBlankPatient(clinicianId){
+  const fid=(state.firm&&state.firm.id)||'';
+  return{
+    id:'pt_'+uid(),firmId:fid,ts:Date.now(),updatedAt:Date.now(),dischargedAt:null,
+    title:'',firstName:'',lastName:'',dob:'',sex:'',nhsNumber:'',preferredPronouns:'',ethnicity:'',languagePreference:'en',
+    email:'',phone:'',address:{line1:'',line2:'',city:'',postcode:'',country:'GB'},
+    nextOfKin:{name:'',relationship:'',phone:''},
+    gpName:'',gpAddress:{line1:'',city:'',postcode:''},gpEmail:'',
+    consentToTreatment:{given:false,givenAt:null,by:'',scope:'',withdrawAt:null},
+    consentToShare:{givenAt:null,recipients:[],scope:'',withdrawAt:null},
+    marketingOptIn:false,
+    vulnerabilityFlag:false,vulnerabilityNotes:'',safeguardingConcerns:[],capacityNotes:'',
+    allergies:[],regularMedications:[],conditions:[],familyHistory:'',
+    episodes:[],
+    nextAppointmentAt:null,
+    primaryClinicianId:clinicianId||(state.clinicians[0]&&state.clinicians[0].id)||''
+  };
+}
+function newBlankEpisode(patientId,clinicianId){return{id:'ep_'+uid(),patientId,clinicianId:clinicianId||state.settings.currentClinicianId||'',openedAt:Date.now(),closedAt:null,presenting:'',diagnosis:'',plan:'',notes:[],prescriptionIds:[],procedures:[],documentsHeld:[],invoices:[]}}
+function newBlankPrescription(patientId,episodeId,clinicianId){return{id:'rx_'+uid(),patientId,episodeId:episodeId||null,clinicianId:clinicianId||state.settings.currentClinicianId||'',ts:Date.now(),drug:'',formulation:'',dose:'',frequency:'',duration:'',quantity:'',batchNo:'',expiry:'',prescribedBy:'',dispensedBy:'',dispensedAt:null,notes:''}}
+function newBlankCD(){return{id:'cd_'+uid(),firmId:(state.firm&&state.firm.id)||'',ts:Date.now(),drug:'',schedule:'2',strength:'',tx:'received',qty:0,unit:'mg',patientId:null,prescriptionRef:'',supplier:'',invoiceNo:'',batchNo:'',expiry:'',destructionMethod:'',destructionReason:'',clinicianId1:state.settings.currentClinicianId||'',clinicianId2:'',witnessNote:''}}
+function newBlankSafeguarding(){return{id:'sg_'+uid(),firmId:(state.firm&&state.firm.id)||'',ts:Date.now(),patientId:state.activePatientId||null,type:'adult',concern:'',raisedBy:state.settings.currentClinicianId||'',referredTo:'',referralDate:null,outcome:'',status:'open',caldicottJustification:''}}
+
+// Critical date flagging
+function clinicianFlags(c){
+  const f=[];if(!c)return f;
+  const r=c.revalidationDue?daysFromNow(c.revalidationDue):null;
+  if(r!==null&&r<0)f.push({sev:'red',msg:'Revalidation overdue'});else if(r!==null&&r<90)f.push({sev:'amber',msg:'Revalidation due in '+r+'d'});
+  const a=c.appraisalLastAt?daysFromNow(c.appraisalLastAt+365*24*3600*1000):null;
+  if(a!==null&&a<0)f.push({sev:'amber',msg:'Annual appraisal overdue'});
+  const ix=c.indemnityExpiry?daysFromNow(c.indemnityExpiry):null;
+  if(ix!==null&&ix<0)f.push({sev:'red',msg:'Indemnity expired'});else if(ix!==null&&ix<30)f.push({sev:'amber',msg:'Indemnity in '+ix+'d'});
+  return f;
+}
+function firmFlags(f){const out=[];if(!f)return out;const ix=f.piExpiresAt?daysFromNow(f.piExpiresAt):null;if(ix!==null&&ix<0)out.push({sev:'red',msg:'Clinic PII expired'});else if(ix!==null&&ix<30)out.push({sev:'amber',msg:'Clinic PII in '+ix+'d'});return out}
+function patientFlags(p){const f=[];if(!p)return f;if(p.vulnerabilityFlag)f.push({sev:'amber',msg:'Vulnerable patient flag'});const ap=p.nextAppointmentAt?daysFromNow(p.nextAppointmentAt):null;if(ap!==null&&ap<0)f.push({sev:'amber',msg:'Missed appointment'});const open=activePatientEpisodes(p).length;if(open>0)f.push({sev:'green',msg:open+' open episode'+(open>1?'s':'')});return f}
+
+// Drug interaction check
+function checkInteractions(patient,newRxName){
+  const out=[];if(!patient||!newRxName)return out;
+  const meds=(patient.regularMedications||[]).map(m=>typeof m==='string'?m:m.name).filter(Boolean);
+  const existing=patientPrescriptions(patient).map(r=>r.drug).filter(Boolean);
+  const all=[...meds,...existing].map(x=>x.toLowerCase());
+  const n=newRxName.toLowerCase();
+  for(const [a,b,sev,note] of INTERACTIONS){
+    const al=a.toLowerCase(),bl=b.toLowerCase();
+    if((n.includes(al)||al.includes(n))&&all.some(m=>m.includes(bl)||bl.includes(m)))out.push({a:newRxName,b,sev,note});
+    else if((n.includes(bl)||bl.includes(n))&&all.some(m=>m.includes(al)||al.includes(m)))out.push({a:newRxName,b:a,sev,note});
+  }
+  return out;
+}
+
+// CD balance per drug
+function cdBalance(drug){
+  let bal=0;
+  for(const e of state.cdRegister){if(e.drug!==drug)continue;const q=+e.qty||0;if(e.tx==='received')bal+=q;else bal-=q}
+  return bal;
+}
+function cdUniqueDrugs(){return Array.from(new Set(state.cdRegister.map(e=>e.drug).filter(Boolean)))}
+</script>
+</body>
+</html>
