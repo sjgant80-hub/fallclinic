@@ -1,0 +1,50 @@
+name: gate
+
+# Somebody who is not the author runs the gate, on a machine the author does not own, from a fresh
+# clone. For a clinical tool that is the only evidence worth anything: the drug-interaction check and
+# the controlled-drug balance are not things to take on trust.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # ⚑ PINNED. An unpinned gate is one whose rules can change under you between the run that
+      # passed and the run you are citing.
+      - name: Fetch witness @v0.2
+        run: git clone --depth 1 --branch v0.2 https://github.com/sjgant80-hub/witness.git .witness
+
+      - name: Tests must pass before anything is mutated
+        run: node clinic.test.mjs
+
+      - name: Mutation gate
+        run: |
+          node .witness/witness.mjs mutate clinic.mjs \
+            --cap 400 \
+            --baseline witness.clinic.baseline.json \
+            --test "node clinic.test.mjs" | tee gate.out
+
+      - name: Refuse anything short of clean
+        run: |
+          node -e "
+            const out = require('fs').readFileSync('gate.out','utf8');
+            const m = /\"clean\":\s*(true|false)/.exec(out);
+            if (!m) { console.error('the gate produced no verdict at all'); process.exit(1); }
+            if (m[1] !== 'true') { console.error('mutants survived — those lines are test-theatre'); process.exit(1); }
+            console.log('gate clean');
+          "
+
+      # ⚑ THE PAGE MUST CONTAIN THE KERNEL THAT WAS JUST GATED. Without this the gate could be green
+      # against a file the shipped tool does not use, which is the most comfortable kind of lie.
+      - name: The shipped page must match the gated kernel
+        run: |
+          node build-page.mjs
+          git diff --exit-code index.html || (echo "index.html is stale — run node build-page.mjs and commit it" && exit 1)

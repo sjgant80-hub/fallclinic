@@ -1,0 +1,8 @@
+[
+  {
+    "line": 128,
+    "mutation": "|| → &&",
+    "snippet": "if (!h || !d) return false;",
+    "reason": "Equivalent, not unguarded. This is the early return in mentions() for a blank name. Swapping the || for && only changes WHICH branch returns false, never the answer: with &&, a blank haystack falls through to the word split, which yields an empty array, and includes('') on it is false; a blank needle falls through to the same split, and no word of a real drug name is the empty string. Both routes return false for every input, so no test can distinguish them. The behaviour that matters — that a blank never counts as a drug mention — is asserted directly in §4 and §5 against both argument positions."
+  }
+]

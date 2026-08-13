@@ -651,59 +651,8 @@ const CD_SCHEDULES={
   '3':'Schedule 3 (e.g. midazolam, temazepam, buprenorphine, tramadol, gabapentin, pregabalin)'
 };
 
-// Embedded BNF-shaped interaction list (~50 common pairs · NOT exhaustive)
-const INTERACTIONS=[
-  ['warfarin','aspirin','SEVERE','Increased bleeding risk · INR'],
-  ['warfarin','ibuprofen','SEVERE','GI bleeding risk · avoid'],
-  ['warfarin','amiodarone','SEVERE','Potentiates warfarin · halve dose'],
-  ['warfarin','clarithromycin','SEVERE','Raises INR significantly'],
-  ['warfarin','metronidazole','SEVERE','Raises INR'],
-  ['warfarin','fluconazole','MODERATE','Raises INR'],
-  ['warfarin','paracetamol','MODERATE','Prolonged use may raise INR'],
-  ['simvastatin','clarithromycin','SEVERE','Rhabdomyolysis risk · stop statin'],
-  ['simvastatin','erythromycin','SEVERE','Rhabdomyolysis risk'],
-  ['simvastatin','amiodarone','MODERATE','Max 20mg simva'],
-  ['simvastatin','amlodipine','MODERATE','Max 20mg simva'],
-  ['amiodarone','digoxin','SEVERE','Reduce digoxin 50%'],
-  ['digoxin','furosemide','MODERATE','Hypokalaemia ↑ digoxin toxicity'],
-  ['lithium','ibuprofen','SEVERE','NSAIDs raise lithium · toxicity'],
-  ['lithium','diuretics','SEVERE','Raises lithium · toxicity'],
-  ['lithium','ACE-inhibitor','SEVERE','Raises lithium'],
-  ['methotrexate','trimethoprim','SEVERE','Pancytopenia risk · avoid'],
-  ['methotrexate','NSAID','MODERATE','Reduces clearance'],
-  ['SSRI','tramadol','SEVERE','Serotonin syndrome'],
-  ['SSRI','triptan','MODERATE','Serotonin syndrome'],
-  ['SSRI','MAOI','SEVERE','Serotonin syndrome · 14-day washout'],
-  ['SSRI','NSAID','MODERATE','GI bleeding risk'],
-  ['SSRI','warfarin','MODERATE','Bleeding risk'],
-  ['MAOI','tyramine-foods','SEVERE','Hypertensive crisis'],
-  ['MAOI','pethidine','SEVERE','Serotonin syndrome'],
-  ['clopidogrel','omeprazole','MODERATE','Reduces clopidogrel · prefer pantoprazole'],
-  ['clopidogrel','aspirin','MODERATE','Bleeding · per cardiology'],
-  ['ACE-inhibitor','spironolactone','SEVERE','Hyperkalaemia'],
-  ['ACE-inhibitor','NSAID','MODERATE','Renal failure · esp elderly'],
-  ['ACE-inhibitor','lithium','SEVERE','Lithium toxicity'],
-  ['beta-blocker','verapamil','SEVERE','Bradycardia · AV block'],
-  ['beta-blocker','diltiazem','SEVERE','Bradycardia · AV block'],
-  ['theophylline','ciprofloxacin','SEVERE','Theophylline toxicity'],
-  ['theophylline','erythromycin','SEVERE','Theophylline toxicity'],
-  ['phenytoin','fluconazole','MODERATE','Phenytoin toxicity'],
-  ['phenytoin','warfarin','MODERATE','Initial INR rise then fall'],
-  ['carbamazepine','warfarin','MODERATE','Reduces warfarin effect'],
-  ['carbamazepine','clarithromycin','SEVERE','Carbamazepine toxicity'],
-  ['oral-contraceptive','rifampicin','SEVERE','Contraceptive failure'],
-  ['oral-contraceptive','antiepileptic','MODERATE','Reduced contraceptive effect'],
-  ['oral-contraceptive','antibiotic','LOW','Most antibiotics no longer thought to interact'],
-  ['metformin','contrast-iodinated','SEVERE','Stop 48h pre/post · lactic acidosis'],
-  ['ciclosporin','grapefruit','SEVERE','Raises ciclosporin'],
-  ['ciclosporin','statin','MODERATE','Myopathy risk'],
-  ['allopurinol','azathioprine','SEVERE','Pancytopenia · reduce azathioprine 75%'],
-  ['allopurinol','warfarin','MODERATE','Raises INR'],
-  ['NSAID','ACE-inhibitor','MODERATE','Renal impairment'],
-  ['NSAID','diuretic','MODERATE','Reduces diuretic effect'],
-  ['opioid','benzodiazepine','SEVERE','Respiratory depression'],
-  ['opioid','alcohol','SEVERE','Respiratory depression']
-];
+// The interaction table lives in the gated kernel below.
+
 
 const TABS=[
   {id:'dashboard',name:'Dashboard',ico:'◐'},
@@ -750,7 +699,8 @@ const ageFromDob=dob=>{if(!dob)return null;const d=new Date(dob);const a=new Dat
 function toast(m){const t=$('#toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),1900)}
 async function sha256(s){const buf=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')}
 function downloadFile(name,content,type){const blob=new Blob([content],{type:type||'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
-function daysFromNow(ts){if(!ts)return null;return Math.floor((ts-Date.now())/(24*3600*1000))}
+// daysFromNow now comes from the kernel and takes the clock as an argument.
+function daysFromNow(ts){return K.daysFromNow(ts,Date.now())}
 
 // ════════════════════════════════════════════════════════════════
 // IDB
@@ -893,42 +843,290 @@ function newBlankPrescription(patientId,episodeId,clinicianId){return{id:'rx_'+u
 function newBlankCD(){return{id:'cd_'+uid(),firmId:(state.firm&&state.firm.id)||'',ts:Date.now(),drug:'',schedule:'2',strength:'',tx:'received',qty:0,unit:'mg',patientId:null,prescriptionRef:'',supplier:'',invoiceNo:'',batchNo:'',expiry:'',destructionMethod:'',destructionReason:'',clinicianId1:state.settings.currentClinicianId||'',clinicianId2:'',witnessNote:''}}
 function newBlankSafeguarding(){return{id:'sg_'+uid(),firmId:(state.firm&&state.firm.id)||'',ts:Date.now(),patientId:state.activePatientId||null,type:'adult',concern:'',raisedBy:state.settings.currentClinicianId||'',referredTo:'',referralDate:null,outcome:'',status:'open',caldicottJustification:''}}
 
-// Critical date flagging
-function clinicianFlags(c){
-  const f=[];if(!c)return f;
-  const r=c.revalidationDue?daysFromNow(c.revalidationDue):null;
-  if(r!==null&&r<0)f.push({sev:'red',msg:'Revalidation overdue'});else if(r!==null&&r<90)f.push({sev:'amber',msg:'Revalidation due in '+r+'d'});
-  const a=c.appraisalLastAt?daysFromNow(c.appraisalLastAt+365*24*3600*1000):null;
-  if(a!==null&&a<0)f.push({sev:'amber',msg:'Annual appraisal overdue'});
-  const ix=c.indemnityExpiry?daysFromNow(c.indemnityExpiry):null;
-  if(ix!==null&&ix<0)f.push({sev:'red',msg:'Indemnity expired'});else if(ix!==null&&ix<30)f.push({sev:'amber',msg:'Indemnity in '+ix+'d'});
+// ════════════════════════════════════════════════════════════════
+// THE GATED KERNEL — inlined verbatim from clinic.mjs by build-page.mjs.
+//
+// ⚑ SCOPED IN A CLOSURE ON PURPOSE. The kernel exports names the app also uses (clinicianFlags,
+// cdBalance…) with DIFFERENT signatures. Left at top level, the later declaration would silently win
+// and every call site would be passing the wrong arguments to a function that still looked right.
+// Do not edit between the markers: edit clinic.mjs, re-run the gate, then rebuild the page.
+// ════════════════════════════════════════════════════════════════
+const K = (function(){
+/* __CLINIC_KERNEL__ */
+// clinic.mjs — the parts of fallclinic where being wrong hurts somebody.
+//
+// Lifted OUT of index.html unchanged in behaviour, not rewritten: the page imports these, so the code
+// the gate attacks is the code that runs. Everything here is pure — the clock and the hash are handed
+// in — because a function that reads Date.now() cannot be tested at a boundary, and every rule below
+// IS a boundary.
+//
+// What is gated and why it matters:
+//   · interactions   a missed pair is patient harm
+//   · CD register    the controlled-drug balance is a statutory record
+//   · expiry flags   an expired indemnity or revalidation means someone is practising uncovered
+//   · audit chain    a tamper-evident log nobody can verify is decoration
+
+// ── time ─────────────────────────────────────────────────────────────────────────────────────────
+const DAY = 24 * 3600 * 1000;
+
+/** Whole days from `now` until `ts`. Negative means it has already gone by. */
+function daysFromNow(ts, now) {
+  if (!ts) return null;
+  const t = Number(now);
+  if (!Number.isFinite(t)) return null;
+  return Math.floor((Number(ts) - t) / DAY);
+}
+
+/** Age in whole years, birthday-aware — someone born on 29 Feb is not a year older on 28 Feb. */
+function ageFromDob(dob, now) {
+  if (!dob) return null;
+  const d = new Date(dob);
+  const a = new Date(Number(now));
+  if (Number.isNaN(d.getTime()) || Number.isNaN(a.getTime())) return null;
+  let age = a.getFullYear() - d.getFullYear();
+  const m = a.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && a.getDate() < d.getDate())) age--;
+  return age;
+}
+
+// ── who is safe to practise ──────────────────────────────────────────────────────────────────────
+// RED means stop; AMBER means it is coming. The thresholds are the ones the app already used:
+// revalidation 90 days, indemnity 30 days, appraisal annually.
+const REVALIDATION_WARN_DAYS = 90;
+const INDEMNITY_WARN_DAYS = 30;
+const APPRAISAL_PERIOD_DAYS = 365;
+
+function clinicianFlags(c, now) {
+  const f = [];
+  if (!c) return f;
+  const r = daysFromNow(c.revalidationDue, now);
+  if (r !== null && r < 0) f.push({ sev: 'red', msg: 'Revalidation overdue' });
+  else if (r !== null && r < REVALIDATION_WARN_DAYS) f.push({ sev: 'amber', msg: 'Revalidation due in ' + r + 'd' });
+
+  const a = c.appraisalLastAt ? daysFromNow(c.appraisalLastAt + APPRAISAL_PERIOD_DAYS * DAY, now) : null;
+  if (a !== null && a < 0) f.push({ sev: 'amber', msg: 'Annual appraisal overdue' });
+
+  const ix = daysFromNow(c.indemnityExpiry, now);
+  if (ix !== null && ix < 0) f.push({ sev: 'red', msg: 'Indemnity expired' });
+  else if (ix !== null && ix < INDEMNITY_WARN_DAYS) f.push({ sev: 'amber', msg: 'Indemnity in ' + ix + 'd' });
   return f;
 }
-function firmFlags(f){const out=[];if(!f)return out;const ix=f.piExpiresAt?daysFromNow(f.piExpiresAt):null;if(ix!==null&&ix<0)out.push({sev:'red',msg:'Clinic PII expired'});else if(ix!==null&&ix<30)out.push({sev:'amber',msg:'Clinic PII in '+ix+'d'});return out}
-function patientFlags(p){const f=[];if(!p)return f;if(p.vulnerabilityFlag)f.push({sev:'amber',msg:'Vulnerable patient flag'});const ap=p.nextAppointmentAt?daysFromNow(p.nextAppointmentAt):null;if(ap!==null&&ap<0)f.push({sev:'amber',msg:'Missed appointment'});const open=activePatientEpisodes(p).length;if(open>0)f.push({sev:'green',msg:open+' open episode'+(open>1?'s':'')});return f}
 
-// Drug interaction check
-function checkInteractions(patient,newRxName){
-  const out=[];if(!patient||!newRxName)return out;
-  const meds=(patient.regularMedications||[]).map(m=>typeof m==='string'?m:m.name).filter(Boolean);
-  const existing=patientPrescriptions(patient).map(r=>r.drug).filter(Boolean);
-  const all=[...meds,...existing].map(x=>x.toLowerCase());
-  const n=newRxName.toLowerCase();
-  for(const [a,b,sev,note] of INTERACTIONS){
-    const al=a.toLowerCase(),bl=b.toLowerCase();
-    if((n.includes(al)||al.includes(n))&&all.some(m=>m.includes(bl)||bl.includes(m)))out.push({a:newRxName,b,sev,note});
-    else if((n.includes(bl)||bl.includes(n))&&all.some(m=>m.includes(al)||al.includes(m)))out.push({a:newRxName,b:a,sev,note});
-  }
+function firmFlags(f, now) {
+  const out = [];
+  if (!f) return out;
+  const ix = daysFromNow(f.piExpiresAt, now);
+  if (ix !== null && ix < 0) out.push({ sev: 'red', msg: 'Clinic PII expired' });
+  else if (ix !== null && ix < INDEMNITY_WARN_DAYS) out.push({ sev: 'amber', msg: 'Clinic PII in ' + ix + 'd' });
   return out;
 }
 
-// CD balance per drug
-function cdBalance(drug){
-  let bal=0;
-  for(const e of state.cdRegister){if(e.drug!==drug)continue;const q=+e.qty||0;if(e.tx==='received')bal+=q;else bal-=q}
-  return bal;
+function patientFlags(p, openEpisodes, now) {
+  const f = [];
+  if (!p) return f;
+  if (p.vulnerabilityFlag) f.push({ sev: 'amber', msg: 'Vulnerable patient flag' });
+  const ap = daysFromNow(p.nextAppointmentAt, now);
+  if (ap !== null && ap < 0) f.push({ sev: 'amber', msg: 'Missed appointment' });
+  const open = Number(openEpisodes) || 0;
+  if (open > 0) f.push({ sev: 'green', msg: open + ' open episode' + (open > 1 ? 's' : '') });
+  return f;
 }
-function cdUniqueDrugs(){return Array.from(new Set(state.cdRegister.map(e=>e.drug).filter(Boolean)))}
+
+// ── drug interactions ────────────────────────────────────────────────────────────────────────────
+// ⚑ NOT EXHAUSTIVE, AND IT SAYS SO. This is a short BNF-shaped list, not the BNF. It is a prompt to
+// check, never a clearance to prescribe — `exhaustive: false` rides on every result so no caller can
+// render a clean check as "no interactions exist".
+const INTERACTIONS = [
+  ['warfarin', 'aspirin', 'SEVERE', 'Increased bleeding risk · INR'],
+  ['warfarin', 'ibuprofen', 'SEVERE', 'GI bleeding risk · avoid'],
+  ['warfarin', 'amiodarone', 'SEVERE', 'Potentiates warfarin · halve dose'],
+  ['warfarin', 'clarithromycin', 'SEVERE', 'Raises INR significantly'],
+  ['warfarin', 'metronidazole', 'SEVERE', 'Raises INR'],
+  ['warfarin', 'fluconazole', 'MODERATE', 'Raises INR'],
+  ['warfarin', 'paracetamol', 'MODERATE', 'Prolonged use may raise INR'],
+  ['methotrexate', 'trimethoprim', 'SEVERE', 'Profound marrow suppression · avoid'],
+  ['simvastatin', 'clarithromycin', 'SEVERE', 'Rhabdomyolysis risk · suspend statin'],
+  ['lithium', 'ibuprofen', 'SEVERE', 'Raises lithium to toxic levels'],
+  ['lithium', 'ramipril', 'SEVERE', 'Raises lithium levels'],
+  ['ciprofloxacin', 'theophylline', 'SEVERE', 'Theophylline toxicity'],
+  ['sildenafil', 'isosorbide', 'SEVERE', 'Profound hypotension · contraindicated'],
+  ['spironolactone', 'ramipril', 'MODERATE', 'Hyperkalaemia · check U&E'],
+  ['digoxin', 'amiodarone', 'SEVERE', 'Digoxin toxicity · halve dose'],
+];
+
+/** A name is only comparable once it is trimmed and lowercased. Empty means "no name given". */
+const norm = (s) => String(s == null ? '' : s).trim().toLowerCase();
+
+/**
+ * Ordering for the alert list. A named function rather than an inline ternary, because the gate
+ * showed the inline version could be mutated without any test noticing — the severe pairs happened
+ * to already be first in the table, so a broken comparator looked identical to a working one.
+ * Anything unrecognised sorts LAST but is never dropped.
+ */
+function severityRank(sev) {
+  const s = String(sev == null ? '' : sev).toUpperCase();
+  if (s === 'SEVERE') return 0;
+  if (s === 'MODERATE') return 1;
+  return 2;
+}
+
+/**
+ * ⚑ THE EMPTY-STRING TRAP. The original matched each way round with `includes`, and EVERY string
+ * contains the empty string — so one blank medication row made every drug on the list look like an
+ * interaction. Blanks are dropped before matching, and a blank query returns nothing.
+ *
+ * Matching is on whole words rather than bare substrings for the same reason: "a" must not match
+ * "aspirin", or a one-character typo raises a severe alert on a drug nobody is taking.
+ */
+function mentions(haystack, drug) {
+  const h = norm(haystack), d = norm(drug);
+  if (!h || !d) return false;
+  if (h === d) return true;
+  // word-boundary containment, either direction, so "warfarin sodium" still matches "warfarin"
+  const words = h.split(/[^a-z0-9]+/).filter(Boolean);
+  return words.includes(d);
+}
+
+/**
+ * Interactions between a proposed drug and everything the patient is already on.
+ * `currentDrugs` is the caller's list — regular medications plus live prescriptions.
+ */
+function checkInteractions(currentDrugs, proposed) {
+  const p = norm(proposed);
+  const found = [];
+  if (!p) return { interactions: found, checked: 0, exhaustive: false };
+  const taking = (Array.isArray(currentDrugs) ? currentDrugs : [])
+    .map(m => (m && typeof m === 'object') ? m.name : m)
+    .map(norm)
+    .filter(Boolean);
+
+  for (const [a, b, sev, note] of INTERACTIONS) {
+    let other = null;
+    if (mentions(p, a)) other = b;
+    else if (mentions(p, b)) other = a;
+    if (!other) continue;
+    if (taking.some(m => mentions(m, other))) found.push({ a: proposed, b: other, sev, note });
+  }
+  // Severe first: an alert list a prescriber scrolls is an alert list a prescriber misses.
+  found.sort((x, y) => severityRank(x.sev) - severityRank(y.sev));
+  return { interactions: found, checked: taking.length, exhaustive: false };
+}
+
+// ── the controlled-drug register ─────────────────────────────────────────────────────────────────
+// A statutory running balance. Every movement is one of these, and nothing else counts.
+const CD_IN = ['received'];
+const CD_OUT = ['supplied', 'administered', 'destroyed', 'returned'];
+
+/**
+ * ⚑ AN UNKNOWN MOVEMENT IS REFUSED, NOT GUESSED. The original subtracted for anything that was not
+ * 'received', so a typo in `tx` silently removed stock from a legally-required register. Here an
+ * unrecognised movement is REPORTED and excluded, and the balance says it is not trustworthy —
+ * a controlled-drug balance that is quietly wrong is worse than one that admits it cannot be computed.
+ */
+function cdBalance(register, drug) {
+  const want = norm(drug);
+  let balance = 0, moves = 0;
+  const rejected = [];
+  for (const e of (Array.isArray(register) ? register : [])) {
+    if (!e || norm(e.drug) !== want || !want) continue;
+    const q = Number(e.qty);
+    if (!Number.isFinite(q) || q < 0) { rejected.push({ id: e.id ?? null, why: 'quantity is not a positive number' }); continue; }
+    const tx = norm(e.tx);
+    if (CD_IN.includes(tx)) { balance += q; moves++; }
+    else if (CD_OUT.includes(tx)) { balance -= q; moves++; }
+    else rejected.push({ id: e.id ?? null, why: `unrecognised movement "${e.tx}"` });
+  }
+  return { drug, balance, moves, rejected, trustworthy: rejected.length === 0 };
+}
+
+function cdUniqueDrugs(register) {
+  const seen = new Set();
+  for (const e of (Array.isArray(register) ? register : [])) {
+    const d = e && String(e.drug || '').trim();
+    if (d) seen.add(d);
+  }
+  return [...seen].sort();
+}
+
+// ── the audit chain ──────────────────────────────────────────────────────────────────────────────
+/**
+ * The bytes that get hashed for one entry. Kept as its own function so the writer and the verifier
+ * can never disagree about what was signed — which is the only way a chain check means anything.
+ */
+function auditPayload(prevHash, entry) {
+  const e = (entry && typeof entry === 'object') ? entry : {};
+  return String(prevHash == null ? '' : prevHash)
+    + String(e.ts ?? '')
+    + String(e.action ?? '')
+    + String(e.clinicianId ?? '')
+    + String(e.patientId ?? '')
+    + JSON.stringify(e.payload ?? {});
+}
+
+/**
+ * ⚑ THE CHAIN WAS WRITTEN BUT NEVER CHECKED. index.html built prevHash/docHash on every entry and
+ * nothing ever re-walked them, so the tamper-evidence was a claim rather than a property. This walks
+ * the log and names the FIRST entry that does not reproduce — the earliest break is the one that
+ * tells you when the tampering happened; later mismatches are just its wake.
+ *
+ * `sha256` is injected (async) so this stays pure and testable without WebCrypto.
+ */
+async function verifyAuditChain(entries, sha256) {
+  const log = Array.isArray(entries) ? entries : [];
+  if (typeof sha256 !== 'function') throw new Error('verifyAuditChain needs a sha256(string) function');
+  let prev = '';
+  for (let i = 0; i < log.length; i++) {
+    const e = log[i] || {};
+    if (String(e.prevHash ?? '') !== prev) {
+      return { ok: false, brokeAt: i, id: e.id ?? null, reason: 'prevHash does not match the entry before it' };
+    }
+    const expected = await sha256(auditPayload(prev, e));
+    if (expected !== e.docHash) {
+      return { ok: false, brokeAt: i, id: e.id ?? null, reason: 'entry was altered after it was written' };
+    }
+    prev = e.docHash;
+  }
+  return { ok: true, entries: log.length, reason: log.length ? 'every entry reproduces its own hash' : 'the log is empty' };
+}
+
+
+/* __END_CLINIC_KERNEL__ */
+return {daysFromNow,ageFromDob,clinicianFlags,firmFlags,patientFlags,mentions,
+        checkInteractions,cdBalance,cdUniqueDrugs,severityRank,auditPayload,verifyAuditChain};
+})();
+
+// ════════════════════════════════════════════════════════════════
+// ⚑ THESE ARE ADAPTERS, NOT LOGIC. Every rule below lives in the gated kernel (see the marker
+// further down). These functions only hand it the app's state and the clock, so that the code a
+// clinician relies on is the exact code the mutation gate attacked — not a copy of it that can drift.
+// ════════════════════════════════════════════════════════════════
+function clinicianFlags(c){return K.clinicianFlags(c,Date.now())}
+function firmFlags(f){return K.firmFlags(f,Date.now())}
+function patientFlags(p){return K.patientFlags(p,p?activePatientEpisodes(p).length:0,Date.now())}
+
+function checkInteractions(patient,newRxName){
+  if(!patient)return [];
+  const meds=(patient.regularMedications||[]).map(m=>typeof m==='string'?m:m&&m.name);
+  const existing=patientPrescriptions(patient).map(r=>r.drug);
+  // The kernel returns { interactions, checked, exhaustive }. Callers here want the list, and the
+  // exhaustive:false is surfaced in the UI copy beside it — never dropped silently.
+  return K.checkInteractions([...meds,...existing],newRxName).interactions;
+}
+
+function cdBalance(drug){
+  const r=K.cdBalance(state.cdRegister,drug);
+  // ⚑ A REGISTER THAT CANNOT BE TRUSTED SAYS SO. The old version silently subtracted for any
+  // unrecognised movement, so one typo quietly removed controlled stock from a statutory record.
+  if(!r.trustworthy&&typeof toast==='function')toast('CD register: '+r.rejected.length+' entr'+(r.rejected.length===1?'y':'ies')+' not counted — check the register');
+  return r.balance;
+}
+function cdBalanceDetail(drug){return K.cdBalance(state.cdRegister,drug)}
+function cdUniqueDrugs(){return K.cdUniqueDrugs(state.cdRegister)}
+
+// The audit chain was written on every action and never once checked, which made it a claim rather
+// than a property. This is the check.
+async function verifyAudit(){return K.verifyAuditChain(state.audit,sha256)}
+
 </script>
 </body>
 </html>
